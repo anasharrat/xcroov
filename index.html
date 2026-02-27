@@ -3,246 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANAS ARMORY | Encrypted Terminal</title>
+    <title>ANAS ARMORY | Secure Access</title>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
-        :root { 
-            --primary: #00ff41; 
-            --bg: #050505; 
-            --accent: #f3ba2f; 
-            --tg: #24A1DE; 
-            --card-glow: rgba(0, 255, 65, 0.1);
-        }
+        :root { --primary: #00ff41; --bg: #050505; --accent: #f3ba2f; --tg: #24A1DE; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; }
+        body { background: var(--bg); color: #fff; overflow: hidden; height: 100vh; }
+
+        /* Matrix Background */
+        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.3; }
+
+        .container { height: 100vh; overflow-y: auto; padding: 40px 20px; position: relative; z-index: 1; }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
+        header { text-align: center; margin-bottom: 50px; }
+        header h1 { color: var(--primary); font-size: clamp(2rem, 8vw, 3.5rem); text-shadow: 0 0 15px var(--primary); letter-spacing: 5px; }
+        header p { font-size: 0.7rem; color: #444; letter-spacing: 3px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background: rgba(10,10,10,0.9); border: 1px solid #1a1a1a; padding: 30px; cursor: pointer; transition: 0.3s; border-left: 3px solid #1a1a1a; }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 0 20px rgba(0,255,65,0.1); }
+        .price-tag { color: var(--primary); font-size: 1.4rem; font-weight: bold; margin-top: 15px; display: block; }
+
+        /* Modal - Payment UI */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; overflow-y: auto; }
+        .modal-content { background: #000; margin: 5vh auto; width: 92%; max-width: 500px; border: 1px solid var(--primary); padding: 30px; position: relative; box-shadow: 0 0 40px rgba(0,255,65,0.2); }
         
-        body { 
-            background-color: var(--bg); 
-            color: #fff; 
-            overflow-x: hidden;
-            background-image: radial-gradient(circle at center, #0a1a0a 0%, #050505 100%);
-        }
+        .pay-methods { display: flex; gap: 10px; margin: 25px 0; }
+        .pay-btn { flex: 1; padding: 12px; border: 1px solid #222; color: #444; cursor: pointer; background: #080808; text-align: center; font-size: 0.7rem; font-weight: bold; }
+        .pay-btn.active { border-color: var(--primary); color: var(--primary); }
 
-        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.6; }
-
-        .lang-switcher { position: fixed; top: 20px; right: 20px; z-index: 1000; }
-        #lang-btn { 
-            background: rgba(0,0,0,0.8); 
-            border: 1px solid var(--primary); 
-            color: var(--primary); 
-            padding: 8px 15px; 
-            cursor: pointer; 
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-        }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+        #stripe-area { display: none; margin-top: 20px; }
+        #card-element { background: #0a0a0a; padding: 15px; border: 1px solid #222; border-radius: 4px; }
         
-        header { text-align: center; margin-bottom: 60px; }
-        header h1 { 
-            font-size: clamp(1.8rem, 6vw, 3.5rem); 
-            color: var(--primary); 
-            text-shadow: 0 0 20px var(--primary);
-            letter-spacing: 3px;
-        }
-        header p { color: #444; letter-spacing: 4px; font-size: 0.6rem; text-transform: uppercase; margin-top: 10px;}
+        #crypto-area { display: block; background: #080808; border: 1px dashed var(--accent); padding: 20px; text-align: center; }
+        .address-box { background: #000; padding: 12px; margin: 15px 0; color: var(--accent); font-size: 0.7rem; word-break: break-all; border: 1px solid #222; line-height: 1.4; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { 
-            background: rgba(10, 10, 10, 0.8); 
-            border: 1px solid #1a1a1a; 
-            border-left: 4px solid #1a1a1a;
-            padding: 30px; 
-            cursor: pointer; 
-            transition: 0.4s; 
-            backdrop-filter: blur(5px); 
-            position: relative;
-        }
-        .card:hover { 
-            border-color: var(--primary); 
-            transform: translateY(-5px);
-            box-shadow: 0 0 30px var(--card-glow);
-        }
-        .card h3 { color: #fff; font-size: 1.3rem; margin: 10px 0; }
-        .price-tag { color: var(--primary); font-size: 1.2rem; font-weight: bold; }
+        .action-btn { background: var(--primary); color: #000; border: none; padding: 18px; width: 100%; font-weight: 900; cursor: pointer; margin-top: 15px; letter-spacing: 2px; }
+        .close-btn { cursor: pointer; float: right; color: #ff4444; font-size: 0.8rem; border: 1px solid #ff4444; padding: 2px 8px; }
 
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 2000; overflow-y: auto; }
-        .modal-content { 
-            background: #000; 
-            margin: 5vh auto; 
-            width: 92%; max-width: 500px; 
-            border: 1px solid var(--primary); 
-            padding: 30px; 
-            position: relative;
-            box-shadow: 0 0 40px rgba(0,255,65,0.2);
-        }
-        .close-btn { cursor: pointer; float: right; color: #ff4444; font-size: 1rem; border: 1px solid #ff4444; padding: 2px 8px; }
-
-        /* منطقة الدفع المصلحة للهواتف */
-        .crypto-box { 
-            background: #080808; 
-            border: 1px dashed var(--accent); 
-            padding: 20px; 
-            margin-top: 25px; 
-            text-align: center;
-            width: 100%;
-        }
-        .address-box { 
-            background: #000; 
-            padding: 12px; 
-            margin: 15px 0; 
-            font-size: 0.75rem; 
-            color: var(--accent); 
-            border: 1px solid #222; 
-            direction: ltr;
-            /* الحل الجذري لمشكلة الخروج عن الإطار */
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: normal;
-            line-height: 1.5;
-        }
-        .action-btn { 
-            background: var(--primary); color: #000; border: none; padding: 18px; 
-            width: 100%; font-weight: 900; cursor: pointer; margin-top: 15px;
-            text-decoration: none; display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem;
-        }
-        .tg-btn { background: var(--tg); color: #fff; }
-
-        footer { text-align: center; padding: 80px 20px; border-top: 1px solid #111; }
+        footer { text-align: center; padding: 60px 0; border-top: 1px solid #111; margin-top: 40px; }
         .social-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 20px; }
-        .social-links a { color: #666; text-decoration: none; font-size: 0.7rem; letter-spacing: 2px; }
+        .social-links a { color: #555; text-decoration: none; font-size: 0.7rem; letter-spacing: 2px; transition: 0.3s; }
         .social-links a:hover { color: var(--primary); }
-        .copyright { color: #222; font-size: 0.5rem; letter-spacing: 2px; }
-
-        .feature-item { color: #888; font-size: 0.85rem; margin-bottom: 8px; text-align: left; }
-        [dir="rtl"] .feature-item { text-align: right; }
     </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
-<div class="lang-switcher"><button id="lang-btn" onclick="toggleLang()">ARABIC</button></div>
 
 <div class="container">
     <header>
         <h1>ANAS ARMORY</h1>
-        <p>Encrypted Asset Distribution</p>
+        <p>RESOURCES_ALLOCATION_TERMINAL</p>
     </header>
+    
     <div class="grid" id="main-grid"></div>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://instagram.com/xcroov" target="_blank">INSTAGRAM</a>
+            <a href="https://t.me/xcrooi" target="_blank">TELEGRAM</a>
+        </div>
+        <p style="color:#222; font-size:0.5rem; letter-spacing:3px;">SYSTEM: ENCRYPTED // &copy; 2026</p>
+    </footer>
 </div>
 
 <div id="modal">
     <div class="modal-content">
-        <span onclick="closeModal()" class="close-btn">X</span>
+        <span onclick="closeModal()" class="close-btn">BACK</span>
         <div id="modal-body"></div>
-        <div class="crypto-box">
-            <p id="pay-info" style="font-size:0.65rem; color:#666; text-transform:uppercase; margin-bottom: 10px;">Network: USDT BEP20 (ONLY)</p>
-            <div class="address-box" id="wallet-addr">0x7bd88d9c535a73767df1e1d1c8dbe229212206d9</div>
-            <button onclick="copyAddr()" id="copy-text" style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px; width:100%; cursor:pointer; font-size:0.7rem; font-weight: bold;">COPY ADDRESS</button>
+
+        <div class="pay-methods">
+            <div id="btn-crypto" class="pay-btn active" onclick="switchPay('crypto')">USDT (BEP20)</div>
+            <div id="btn-visa" class="pay-btn" onclick="switchPay('visa')">CREDIT CARD</div>
         </div>
-        <a href="https://t.me/xcrooi" target="_blank" class="action-btn tg-btn" id="tg-text">VERIFY PAYMENT</a>
+
+        <div id="crypto-area">
+            <div class="address-box" id="wallet-addr">0x7bd88d9c535a73767df1e1d1c8dbe229212206d9</div>
+            <button onclick="copyAddr()" style="background:transparent; border:1px solid var(--accent); color:var(--accent); width:100%; padding:8px; cursor:pointer; font-size:0.7rem;">COPY HASH</button>
+            <a href="https://t.me/xcrooi" target="_blank" class="action-btn" style="background:var(--tg); color:#fff; text-decoration:none; display:flex; justify-content:center; align-items:center;">VERIFY ON TG</a>
+        </div>
+
+        <div id="stripe-area">
+            <div id="card-element"></div>
+            <div id="card-errors" style="color:#ff4444; font-size:0.7rem; margin-top:10px;"></div>
+            <button id="submit-stripe" class="action-btn" onclick="handleStripePayment()">CONFIRM ORDER</button>
+        </div>
     </div>
 </div>
 
-<footer>
-    <div class="social-links">
-        <a href="https://instagram.com/xcroov" target="_blank">INSTAGRAM</a>
-        <a href="https://t.me/xcrooi" target="_blank">TELEGRAM</a>
-    </div>
-    <div class="copyright">SECURE_CHANNEL_V3 // &copy; 2026</div>
-</footer>
-
 <script>
-    // Matrix-like background
-    const canvas = document.getElementById('bg-canvas');
-    const ctx = canvas.getContext('2d');
-    let pts = [];
-    function res() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    window.onresize = res; res();
-    class Pt {
-        constructor() { this.reset(); }
-        reset() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.s = Math.random()*2; this.v = Math.random()*0.5 + 0.1; }
-        upd() { this.y -= this.v; if(this.y<0) this.reset(); }
-        draw() { ctx.fillStyle="rgba(0,255,65,0.2)"; ctx.fillRect(this.x, this.y, 1, 15); }
-    }
-    for(let i=0; i<60; i++) pts.push(new Pt());
-    function anim() { ctx.clearRect(0,0,canvas.width,canvas.height); pts.forEach(p=>{p.upd(); p.draw();}); requestAnimationFrame(anim); }
-    anim();
+    // Stripe Initialization with your Key
+    const stripe = Stripe('pk_test_51T5VnyLKJYtKx71D6ueMpAGjNCTI2QMvlIj63adTnCauhwsAPqKJRQsSQiUZrTTWfPJ38217LvDqmaIoQexoRNwO00si9hhpu1');
+    const elements = stripe.elements();
+    const card = elements.create('card', {
+        style: { base: { color: '#00ff41', fontFamily: 'monospace', fontSize: '16px', '::placeholder': { color: '#333' } } }
+    });
+    card.mount('#card-element');
 
-    const data = {
-        en: {
-            pay: "Network: USDT BEP20 (ONLY)",
-            tg: "VERIFY PAYMENT",
-            copy: "COPY ADDRESS",
-            tools: [
-                { name: "VOID-X", sticker: "🌌", price: 149, f: ["Invisible Network Recon", "Ghost Firewall Bypass"] },
-                { name: "NEBULA-7", sticker: "🛸", price: 299, f: ["Quantum Decryption Node", "High-Priority Brute"] },
-                { name: "PHANTOM-EYE", sticker: "👁️", price: 199, f: ["Active Asset Tracking", "Deep OSINT Extraction"] },
-                { name: "CYPHER-STRIKE", sticker: "⚡", price: 350, f: ["Silent Payload Injection", "WAF Logic Bypass"] },
-                { name: "TITAN-SHELL", sticker: "🛡️", price: 499, f: ["Permanent Backdoor Root", "Military Grade Encryption"] },
-                { name: "CODE-ZERO", sticker: "☣️", price: 499, old: 999, f: ["Private Zero-Day Catalog", "AI-Driven Vulnerability Audit"] }
-            ]
-        },
-        ar: {
-            pay: "الشبكة: USDT BEP20 (فقط)",
-            tg: "تأكيد الدفع",
-            copy: "نسخ العنوان",
-            tools: [
-                { name: "VOID-X", sticker: "🌌", price: 149, f: ["استطلاع خفي", "تجاوز الجدران النارية"] },
-                { name: "NEBULA-7", sticker: "🛸", price: 299, f: ["فك تشفير كمي", "تخمين سريع جداً"] },
-                { name: "PHANTOM-EYE", sticker: "👁️", price: 199, f: ["تتبع الأهداف", "جمع بيانات OSINT"] },
-                { name: "CYPHER-STRIKE", sticker: "⚡", price: 350, f: ["حقن قواعد البيانات", "تخطي حماية WAF"] },
-                { name: "TITAN-SHELL", sticker: "🛡️", price: 499, f: ["وصول دائم للسيرفر", "تشفير AES-256"] },
-                { name: "CODE-ZERO", sticker: "☣️", price: 499, old: 999, f: ["ثغرات الصفر الخاصة", "فحص ذكاء اصطناعي"] }
-            ]
-        }
-    };
+    const tools = [
+        { name: "VOID-X", price: 149 }, { name: "NEBULA-7", price: 299 },
+        { name: "PHANTOM-EYE", price: 199 }, { name: "CYPHER-STRIKE", price: 350 },
+        { name: "TITAN-SHELL", price: 499 }, { name: "CODE-ZERO", price: 499 }
+    ];
 
-    let lang = 'en';
     function render() {
-        const g = document.getElementById('main-grid'); g.innerHTML = '';
-        data[lang].tools.forEach((t, i) => {
+        const g = document.getElementById('main-grid');
+        tools.forEach((t, i) => {
             g.innerHTML += `<div class="card" onclick="openT(${i})">
-                <div style="font-size:0.5rem; color:#333; margin-bottom:10px;">#SERIAL_00${i+1}</div>
+                <div style="font-size:0.5rem; color:#222; margin-bottom:10px;">UNIT_CODE: 0${i+1}</div>
                 <h3>${t.name}</h3>
-                <span class="price-tag">$${t.price} ${t.old?`<span style="text-decoration:line-through; color:#400; font-size:0.8rem; margin-left:10px;">$${t.old}</span>`:''}</span>
+                <span class="price-tag">$${t.price}.00</span>
             </div>`;
         });
     }
 
     function openT(i) {
-        const t = data[lang].tools[i];
-        let fHtml = ''; t.f.forEach(feat => fHtml += `<div class="feature-item">> ${feat}</div>`);
+        const t = tools[i];
         document.getElementById('modal-body').innerHTML = `
-            <div style="text-align:center">
-                <h2 style="color:var(--primary); font-size:1.8rem; margin-bottom:15px;">${t.name}</h2>
-                <div style="margin:20px 0;">${fHtml}</div>
-                <div style="font-size:2rem; font-weight:900;">$${t.price}.00</div>
+            <div style="text-align:center; margin-bottom:15px;">
+                <h2 style="color:var(--primary)">${t.name}</h2>
+                <p style="font-size:1.8rem; margin-top:10px;">$${t.price}.00</p>
             </div>`;
         document.getElementById('modal').style.display = 'block';
     }
 
-    function toggleLang() {
-        lang = lang === 'en' ? 'ar' : 'en';
-        document.getElementById('main-html').dir = lang === 'ar' ? 'rtl' : 'ltr';
-        document.getElementById('lang-btn').innerText = lang === 'en' ? 'ARABIC' : 'ENGLISH';
-        document.getElementById('pay-info').innerText = data[lang].pay;
-        document.getElementById('tg-text').innerText = data[lang].tg;
-        document.getElementById('copy-text').innerText = data[lang].copy;
-        render();
+    function switchPay(type) {
+        document.getElementById('crypto-area').style.display = type === 'crypto' ? 'block' : 'none';
+        document.getElementById('stripe-area').style.display = type === 'visa' ? 'block' : 'none';
+        document.getElementById('btn-crypto').className = 'pay-btn' + (type === 'crypto' ? ' active' : '');
+        document.getElementById('btn-visa').className = 'pay-btn' + (type === 'visa' ? ' active' : '');
+    }
+
+    async function handleStripePayment() {
+        const {token, error} = await stripe.createToken(card);
+        if (error) { document.getElementById('card-errors').textContent = error.message; }
+        else { alert("SECURE TOKEN GENERATED: " + token.id); }
     }
 
     function copyAddr() { 
         navigator.clipboard.writeText("0x7bd88d9c535a73767df1e1d1c8dbe229212206d9"); 
-        const box = document.querySelector('.address-box');
-        box.style.borderColor = 'var(--accent)';
-        box.style.boxShadow = '0 0 15px var(--accent)';
-        setTimeout(() => { box.style.boxShadow = 'none'; }, 500);
-        alert("ADDRESS COPIED."); 
+        alert("HASH COPIED"); 
     }
-    
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
     render();
+
+    // Background Rain Effect
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const columns = Math.floor(canvas.width / 20);
+    const drops = Array(columns).fill(1);
+    function drawRain() {
+        ctx.fillStyle = "rgba(5, 5, 5, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#00ff41"; ctx.font = "15px monospace";
+        drops.forEach((y, i) => {
+            ctx.fillText(String.fromCharCode(Math.random()*128), i*20, y*20);
+            if (y*20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        });
+    }
+    setInterval(drawRain, 50);
 </script>
 </body>
 </html>
