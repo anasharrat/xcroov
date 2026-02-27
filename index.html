@@ -3,72 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANAS DIGITAL ARMORY | Private Cyber Weapons</title>
+    <title>ANAS ARMORY | Encrypted Terminal</title>
     <style>
-        :root { --primary: #00ff41; --bg: #020202; --accent: #f3ba2f; --tg: #24A1DE; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg); color: #fff; overflow-x: hidden; }
+        :root { 
+            --primary: #00ff41; 
+            --bg: #050505; 
+            --accent: #f3ba2f; 
+            --tg: #24A1DE; 
+            --card-glow: rgba(0, 255, 65, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: #fff; 
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at center, #0a1a0a 0%, #050505 100%);
+        }
 
-        /* Animated Background */
-        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; background: radial-gradient(circle at center, #0a1f0a 0%, #030303 100%); }
+        /* محرك الخلفية الرقمية */
+        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.6; }
 
-        /* Language Switcher */
-        .lang-switcher { position: absolute; top: 20px; right: 20px; z-index: 1000; }
-        #lang-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        #lang-btn:hover { background: var(--primary); color: #000; }
+        /* زر اللغة بلمسة تقنية */
+        .lang-switcher { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        #lang-btn { 
+            background: rgba(0,0,0,0.8); 
+            border: 1px solid var(--primary); 
+            color: var(--primary); 
+            padding: 10px 25px; 
+            cursor: pointer; 
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            box-shadow: 0 0 10px var(--card-glow);
+        }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
-        header { text-align: center; margin-bottom: 60px; }
-        header h1 { font-size: clamp(2.5rem, 8vw, 4rem); color: var(--primary); text-shadow: 0 0 20px rgba(0, 255, 65, 0.4); text-transform: uppercase; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 80px 20px; }
+        
+        header { text-align: center; margin-bottom: 80px; position: relative; }
+        header h1 { 
+            font-size: clamp(2rem, 6vw, 3.5rem); 
+            color: var(--primary); 
+            text-shadow: 0 0 20px var(--primary);
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+        }
+        header p { color: #444; letter-spacing: 8px; font-size: 0.7rem; text-transform: uppercase; }
 
-        /* Grid & Cards */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
-        .card { background: rgba(15, 15, 15, 0.9); border: 1px solid #222; border-radius: 20px; padding: 30px; cursor: pointer; transition: 0.4s; backdrop-filter: blur(10px); text-align: center; }
-        .card:hover { border-color: var(--primary); transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0,255,65,0.2); }
-        .price-tag { color: var(--primary); font-weight: bold; font-size: 1.3rem; margin-top: 10px; display: block; }
+        /* الكروت بنظام "واجهة المستخدم المستقبلية" */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+        .card { 
+            background: rgba(10, 10, 10, 0.8); 
+            border: 1px solid #1a1a1a; 
+            border-left: 4px solid #1a1a1a;
+            padding: 40px; 
+            cursor: pointer; 
+            transition: 0.5s; 
+            backdrop-filter: blur(5px); 
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0,255,65,0.03));
+        }
+        .card:hover { 
+            border-color: var(--primary); 
+            border-left-color: var(--primary);
+            transform: scale(1.02);
+            box-shadow: 0 0 40px var(--card-glow);
+        }
+        .card h3 { color: #fff; font-size: 1.5rem; margin: 15px 0; letter-spacing: 2px; }
+        .price-tag { color: var(--primary); font-size: 1.4rem; font-weight: bold; }
 
-        /* Modal Settings */
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; overflow-y: auto; }
-        .modal-content { background: #080808; margin: 5vh auto; width: 90%; max-width: 600px; border-radius: 25px; padding: 35px; border: 1px solid #333; position: relative; border-top: 5px solid var(--accent); }
-        .close-btn { cursor: pointer; float: right; color: #ff4444; font-size: 1.5rem; }
-        [dir="rtl"] .close-btn { float: left; }
+        /* النافذة المنبثقة المشفرة */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; overflow-y: auto; }
+        .modal-content { 
+            background: #000; 
+            margin: 5vh auto; 
+            width: 90%; max-width: 550px; 
+            border: 1px solid var(--primary); 
+            padding: 40px; 
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,255,65,0.2);
+        }
+        .close-btn { cursor: pointer; float: right; color: #ff4444; font-size: 1.2rem; }
 
-        /* Payment UI */
-        .crypto-box { background: #111; border: 1px dashed var(--accent); padding: 20px; border-radius: 15px; margin-top: 20px; }
-        .address-box { background: #000; padding: 12px; border-radius: 8px; margin: 10px 0; font-family: monospace; color: var(--accent); word-break: break-all; border: 1px solid #222; direction: ltr; text-align: center; }
-        .action-btn { background: var(--primary); color: #000; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: 900; cursor: pointer; margin-top: 15px; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+        /* منطقة الدفع */
+        .crypto-box { background: #080808; border: 1px dashed var(--accent); padding: 25px; margin-top: 30px; text-align: center; }
+        .address-box { 
+            background: #000; padding: 15px; margin: 15px 0; 
+            font-size: 0.8rem; color: var(--accent); border: 1px solid #222; 
+        }
+        .action-btn { 
+            background: var(--primary); color: #000; border: none; padding: 20px; 
+            width: 100%; font-weight: 900; cursor: pointer; margin-top: 20px;
+            text-decoration: none; display: flex; align-items: center; justify-content: center;
+            letter-spacing: 2px;
+        }
         .tg-btn { background: var(--tg); color: #fff; }
 
-        /* Footer & Social */
-        footer { text-align: center; padding: 60px; border-top: 1px solid #111; margin-top: 50px; }
-        .social-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 20px; }
-        .social-links a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 1.1rem; transition: 0.3s; }
-        .social-links a:hover { text-shadow: 0 0 10px var(--primary); }
+        /* التذييل الفخم (بدون اسم الموقع المكرر) */
+        footer { text-align: center; padding: 100px 20px; border-top: 1px solid #111; background: #000; }
+        .social-links { display: flex; justify-content: center; gap: 40px; margin-bottom: 30px; }
+        .social-links a { 
+            color: #666; text-decoration: none; font-size: 0.8rem; 
+            letter-spacing: 3px; transition: 0.3s; 
+        }
+        .social-links a:hover { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .copyright { color: #222; font-size: 0.6rem; letter-spacing: 2px; }
 
-        .feature-item { text-align: left; color: #aaa; margin-bottom: 8px; }
-        [dir="rtl"] .feature-item { text-align: right; }
+        .feature-item { color: #888; font-size: 0.9rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
-<div class="lang-switcher"><button id="lang-btn" onclick="toggleLang()">العربية</button></div>
+<div class="lang-switcher"><button id="lang-btn" onclick="toggleLang()">ARABIC</button></div>
 
 <div class="container">
-    <header><h1 id="title">ANAS DIGITAL ARMORY</h1></header>
+    <header>
+        <h1>ANAS ARMORY</h1>
+        <p>Restricted Access - Elite Cyber Intelligence</p>
+    </header>
     <div class="grid" id="main-grid"></div>
 </div>
 
 <div id="modal">
     <div class="modal-content">
-        <span onclick="closeModal()" class="close-btn">✕</span>
+        <span onclick="closeModal()" class="close-btn">[ ESC_X ]</span>
         <div id="modal-body"></div>
         <div class="crypto-box">
-            <p id="pay-info" style="font-size:0.9rem; color:#888;">Send USDT (BEP20) to this address:</p>
+            <p id="pay-info" style="font-size:0.7rem; color:#666; text-transform:uppercase;">SECURE PAYMENT GATEWAY (USDT BEP20):</p>
             <div class="address-box">0x7bd88d9c535a73767df1e1d1c8dbe229212206d9</div>
-            <button onclick="copyAddr()" id="copy-text" style="background:var(--accent); border:none; padding:8px; width:100%; cursor:pointer; font-weight:bold; border-radius:5px;">COPY ADDRESS</button>
+            <button onclick="copyAddr()" id="copy-text" style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:5px; width:100%; cursor:pointer; font-size:0.7rem;">COPY HASH ADDRESS</button>
         </div>
-        <a href="https://t.me/xcrooi" target="_blank" class="action-btn tg-btn" id="tg-text">CONFIRM ON TELEGRAM</a>
+        <a href="https://t.me/xcrooi" target="_blank" class="action-btn tg-btn" id="tg-text">VERIFY TRANSACTION</a>
     </div>
 </div>
 
@@ -77,11 +148,11 @@
         <a href="https://instagram.com/xcroov" target="_blank">INSTAGRAM</a>
         <a href="https://t.me/xcrooi" target="_blank">TELEGRAM</a>
     </div>
-    <p style="color:#333;">&copy; 2026 ANAS ARMORY - ALL RIGHTS RESERVED</p>
+    <div class="copyright">SYSTEM STATUS: OPERATIONAL | &copy; 2026 PRIVATE_SEC</div>
 </footer>
 
 <script>
-    // Particle System
+    // نظام خلفية مصفوفة البيانات (Data Stream)
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
     let pts = [];
@@ -89,164 +160,84 @@
     window.onresize = res; res();
     class Pt {
         constructor() { this.reset(); }
-        reset() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.s = Math.random()*2; this.v = Math.random()*1 + 0.5; }
+        reset() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.s = Math.random()*2; this.v = Math.random()*0.5 + 0.2; }
         upd() { this.y -= this.v; if(this.y<0) this.reset(); }
-        draw() { ctx.fillStyle="rgba(0,255,65,0.3)"; ctx.beginPath(); ctx.arc(this.x,this.y,this.s,0,Math.PI*2); ctx.fill(); }
+        draw() { 
+            ctx.fillStyle="rgba(0,255,65,0.2)"; 
+            ctx.fillRect(this.x, this.y, 1, Math.random()*20); 
+        }
     }
-    for(let i=0; i<100; i++) pts.push(new Pt());
+    for(let i=0; i<80; i++) pts.push(new Pt());
     function anim() { ctx.clearRect(0,0,canvas.width,canvas.height); pts.forEach(p=>{p.upd(); p.draw();}); requestAnimationFrame(anim); }
     anim();
 
     const data = {
         en: {
-            title: "ANAS DIGITAL ARMORY",
             pay: "Send USDT (BEP20) to this address:",
             tg: "CONFIRM ON TELEGRAM",
-            copy: "COPY ADDRESS",
+            copy: "COPY HASH ADDRESS",
             tools: [
-                { name: "VOID-X", sticker: "🌌", price: 149, f: ["Full Stealth Recon", "Network Firewall Bypass"] },
-                { name: "NEBULA-7", sticker: "🛸", price: 299, f: ["Quantum Decryption", "Ultra-Speed Brute-force"] },
-                { name: "PHANTOM-EYE", sticker: "👁️", price: 199, f: ["Digital Trace & Track", "Global OSINT Search"] },
-                { name: "CYPHER-STRIKE", sticker: "⚡", price: 350, f: ["Silent SQL Injection", "WAF Security Bypass"] },
-                { name: "TITAN-SHELL", sticker: "🛡️", price: 499, f: ["Remote Persistence", "AES-256 Encryption"] },
-                { name: "CODE-ZERO", sticker: "☣️", price: 499, old: 999, f: ["Zero-Day Vulnerability Hunt", "AI Audit Engine"] }
+                { name: "VOID-X", sticker: "🌌", price: 149, f: ["Invisible Network Recon", "Ghost Firewall Bypass"] },
+                { name: "NEBULA-7", sticker: "🛸", price: 299, f: ["Quantum Decryption Node", "High-Priority Brute"] },
+                { name: "PHANTOM-EYE", sticker: "👁️", price: 199, f: ["Active Asset Tracking", "Deep OSINT Extraction"] },
+                { name: "CYPHER-STRIKE", sticker: "⚡", price: 350, f: ["Silent Payload Injection", "WAF Logic Bypass"] },
+                { name: "TITAN-SHELL", sticker: "🛡️", price: 499, f: ["Permanent Backdoor Root", "Military Grade Encryption"] },
+                { name: "CODE-ZERO", sticker: "☣️", price: 499, old: 999, f: ["Private Zero-Day Catalog", "AI-Driven Vulnerability Audit"] }
             ]
         },
         ar: {
-            title: "ANAS DIGITAL ARMORY", // المحافظة على الاسم بالإنجليزي
-            pay: "أرسل USDT (BEP20) للعنوان التالي:",
-            tg: "تأكيد الدفع عبر تليجرام",
-            copy: "نسخ العنوان",
+            pay: "حول المبلغ USDT (BEP20) لهذا العنوان:",
+            tg: "تأكيد العملية عبر تليجرام",
+            copy: "نسخ عنوان المحفظة",
             tools: [
-                { name: "VOID-X", sticker: "🌌", price: 149, f: ["تخفي كامل", "تجاوز جدران الحماية"] },
-                { name: "NEBULA-7", sticker: "🛸", price: 299, f: ["فك تشفير كمي", "تخمين فائق السرعة"] },
-                { name: "PHANTOM-EYE", sticker: "👁️", price: 199, f: ["تتبع البصمة الرقمية", "بحث OSINT شامل"] },
-                { name: "CYPHER-STRIKE", sticker: "⚡", price: 350, f: ["حقن SQL صامت", "تخطي أنظمة WAF"] },
-                { name: "TITAN-SHELL", sticker: "🛡️", price: 499, f: ["وصول مستمر", "تشفير AES-256"] },
-                { name: "CODE-ZERO", sticker: "☣️", price: 499, old: 999, f: ["صيد ثغرات 0-Day", "ذكاء اصطناعي"] }
+                { name: "VOID-X", sticker: "🌌", price: 149, f: ["استطلاع شبكي خفي", "تخطي الجدران النارية"] },
+                { name: "NEBULA-7", sticker: "🛸", price: 299, f: ["فك تشفير كمي", "تخمين عالي الأولوية"] },
+                { name: "PHANTOM-EYE", sticker: "👁️", price: 199, f: ["تتبع الأصول النشط", "استخراج بيانات OSINT"] },
+                { name: "CYPHER-STRIKE", sticker: "⚡", price: 350, f: ["حقن الحمولات الصامتة", "تجاوز منطق WAF"] },
+                { name: "TITAN-SHELL", sticker: "🛡️", price: 499, f: ["جذر خلفي دائم", "تشفير برتبة عسكرية"] },
+                { name: "CODE-ZERO", sticker: "☣️", price: 499, old: 999, f: ["كتالوج ثغرات الصفر الخاص", "تدقيق الثغرات بالذكاء الاصطناعي"] }
             ]
         }
     };
 
-    let lang = 'en'; // اللغة الأساسية إنجليزية
+    let lang = 'en';
     function render() {
         const g = document.getElementById('main-grid'); g.innerHTML = '';
         data[lang].tools.forEach((t, i) => {
             g.innerHTML += `<div class="card" onclick="openT(${i})">
-                <span style="font-size:50px">${t.sticker}</span>
+                <div style="font-size:0.6rem; color:#333; margin-bottom:10px;">ID: 00${i+1}_SECURE</div>
                 <h3>${t.name}</h3>
-                <span class="price-tag">$${t.price} ${t.old?`<span style="text-decoration:line-through; color:red; font-size:0.8rem;">$${t.old}</span>`:''}</span>
+                <span class="price-tag">$${t.price} ${t.old?`<span style="text-decoration:line-through; color:#400; font-size:0.8rem; margin-left:10px;">$${t.old}</span>`:''}</span>
+                <div style="margin-top:20px; font-size:0.7rem; color:var(--primary); opacity:0.5;">[ ACCESS GRANTED ]</div>
             </div>`;
         });
     }
 
     function openT(i) {
         const t = data[lang].tools[i];
-        let fHtml = ''; t.f.forEach(feat => fHtml += `<div class="feature-item">✓ ${feat}</div>`);
-        document.getElementById('modal-body').innerHTML = `<div style="text-align:center">
-            <span style="font-size:70px">${t.sticker}</span>
-            <h2 style="color:var(--primary)">${t.name}</h2>
-            <div style="margin:20px 0;">${fHtml}</div>
-            <div style="font-size:2rem; font-weight:900;">$${t.price}.00</div>
-        </div>`;
+        let fHtml = ''; t.f.forEach(feat => fHtml += `<div class="feature-item">>> ${feat}</div>`);
+        document.getElementById('modal-body').innerHTML = `
+            <div style="text-align:left">
+                <h2 style="color:var(--primary); font-size:2rem; border-bottom:1px solid #222; padding-bottom:10px;">${t.name}</h2>
+                <div style="margin:25px 0; font-family:monospace;">${fHtml}</div>
+                <div style="font-size:2rem; font-weight:900; color:#fff; text-align:center;">$${t.price}.00</div>
+            </div>`;
         document.getElementById('modal').style.display = 'block';
     }
 
     function toggleLang() {
         lang = lang === 'en' ? 'ar' : 'en';
         document.getElementById('main-html').dir = lang === 'ar' ? 'rtl' : 'ltr';
-        document.getElementById('lang-btn').innerText = lang === 'en' ? 'العربية' : 'English';
+        document.getElementById('lang-btn').innerText = lang === 'en' ? 'ARABIC' : 'ENGLISH';
         document.getElementById('pay-info').innerText = data[lang].pay;
         document.getElementById('tg-text').innerText = data[lang].tg;
         document.getElementById('copy-text').innerText = data[lang].copy;
         render();
     }
 
-    function copyAddr() { navigator.clipboard.writeText("0x7bd88d9c535a73767df1e1d1c8dbe229212206d9"); alert("Address Copied!"); }
+    function copyAddr() { navigator.clipboard.writeText("0x7bd88d9c535a73767df1e1d1c8dbe229212206d9"); alert("HASH COPIED."); }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
     render();
-</script>
-</body>
-</html><div class="container">
-    <header><h1>ANAS PRIVATE ARMORY</h1></header>
-    <div class="grid" id="main-grid"></div>
-</div>
-
-<div id="modal">
-    <div class="modal-content">
-        <span onclick="closeModal()" class="close-btn">✕ إغلاق</span>
-        <div id="modal-body"></div>
-        
-        <div class="crypto-box">
-            <p style="color: var(--accent); font-weight: bold; margin-bottom: 10px;">💳 الدفع عبر USDT (BEP20) فقط</p>
-            <p style="font-size:0.8rem; color:#888;">قم بتحويل المبلغ للعنوان أدناه ثم تواصل معنا:</p>
-            <div class="address-box" id="wallet-addr">0x7bd88d9c535a73767df1e1d1c8dbe229212206d9</div>
-            <button onclick="copyAddr()" style="background:var(--accent); border:none; padding:8px 20px; border-radius:6px; cursor:pointer; font-weight:bold; width:100%;">نسخ عنوان المحفظة</button>
-        </div>
-
-        <a href="https://t.me/xcrooi" target="_blank" class="action-btn tg-btn">
-             إرسال إثبات الدفع (تليجرام)
-        </a>
-    </div>
-</div>
-
-<script>
-    const tools = [
-        { name: "VOID-X", sticker: "🌌", price: 149, features: ["تخفي كامل عن الرادار", "تجاوز جدران الحماية", "تشفير الأنفاق"] },
-        { name: "NEBULA-7", sticker: "🛸", price: 299, features: ["فك تشفير كمي", "تخمين فائق السرعة", "دعم كافة الهاشات"] },
-        { name: "PHANTOM-EYE", sticker: "👁️", price: 199, features: ["تتبع البصمة الرقمية", "بحث OSINT شامل", "مراقبة الأهداف"] },
-        { name: "CYPHER-STRIKE", sticker: "⚡", price: 350, features: ["حقن SQL صامت", "استخراج قواعد بيانات", "تخطي أنظمة WAF"] },
-        { name: "TITAN-SHELL", sticker: "🛡️", price: 499, features: ["وصول خلفي مستمر", "تحكم كامل بالسيرفر", "تشفير AES-256"] },
-        { name: "CODE-ZERO", sticker: "☣️", price: 499, oldP: 999, features: ["صيد ثغرات 0-Day", "تحليل ذكاء اصطناعي", "توليد استغلالات"] }
-    ];
-
-    function render() {
-        const g = document.getElementById('main-grid');
-        tools.forEach((t, i) => {
-            const oldHtml = t.oldP ? `<span class="old-p">$${t.oldP}</span>` : '';
-            g.innerHTML += `<div class="card" onclick="openTool(${i})">
-                <span style="font-size:50px">${t.sticker}</span>
-                <h3>${t.name}</h3>
-                <div class="price-tag">$${t.price}${oldHtml}</div>
-                <p style="color:#555; font-size:0.8rem; margin-top:10px;">اضغط لعرض التفاصيل والشراء</p>
-            </div>`;
-        });
-    }
-
-    function openTool(i) {
-        const t = tools[i];
-        let fHtml = ''; t.features.forEach(f => fHtml += `<div class="feature-item">${f}</div>`);
-        document.getElementById('modal-body').innerHTML = `
-            <div style="text-align:center; margin-top: 10px;">
-                <span style="font-size:60px">${t.sticker}</span>
-                <h2 style="color:var(--primary); margin:10px 0;">${t.name}</h2>
-                <div style="background:#111; padding:15px; border-radius:12px; text-align:right; margin-bottom:15px;">
-                    <h4 style="color:var(--primary); margin-bottom:8px;">المواصفات التقنية:</h4>
-                    ${fHtml}
-                </div>
-                <div style="font-size:1.8rem; font-weight:900;">$${t.price}.00</div>
-            </div>`;
-        document.getElementById('modal').style.display = 'block';
-    }
-
-    function copyAddr() { 
-        navigator.clipboard.writeText("0x7bd88d9c535a73767df1e1d1c8dbe229212206d9"); 
-        alert("تم نسخ العنوان بنجاح! يرجى تحويل USDT BEP20 حصراً."); 
-    }
-    
-    function closeModal() { document.getElementById('modal').style.display = 'none'; }
-    
-    // Background Animation
-    const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    let particles = Array(80).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*1.5 }));
-    function anim() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = "rgba(0,255,65,0.15)";
-        particles.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill(); p.y -= 0.3; if(p.y<0) p.y=canvas.height; });
-        requestAnimationFrame(anim);
-    }
-    anim(); render();
 </script>
 </body>
 </html>
